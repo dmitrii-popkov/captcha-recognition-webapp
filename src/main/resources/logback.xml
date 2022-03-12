@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+        <pattern>
+        %d{MM-dd-yy HH:mm:ss,SSS} [%X{login}] %logger{10} - %msg%n
+        </pattern>
+        </layout>
+    </appender>
+    <appender name="roll-by-size" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>target/log/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>target/slf4j/roll-by-size/app.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>3</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>5KB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%d{MM-dd-yy HH:mm:ss,SSS} [%X{login}] %logger{10} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="com.epam" level="debug" additivity="false">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="roll-by-size" />
+
+    </logger>
+    <root level="error">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="roll-by-size" />
+    </root>
+</configuration>

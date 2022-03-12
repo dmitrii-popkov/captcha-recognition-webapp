@@ -1,0 +1,1 @@
+1. Application dmitrii-popkov-spring-exercise has been successfully deployed!!

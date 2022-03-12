@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        app: dmitrii-popkov-spring-exercise
+    name: dmitrii-popkov-spring-exercise-db
+spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: dmitrii-popkov-spring-exercise-db
+    strategy:
+        type: Recreate
+    template:
+        metadata:
+            labels:
+                app: dmitrii-popkov-spring-exercise-db
+        spec:
+            containers:
+                - name: dmitrii-popkov-spring-exercise-db
+                  env:
+                      - name: POSTGRES_DB
+                        value: dmitrii-popkov-spring-exercise-db
+                      - name: POSTGRES_USER
+                        value: "admin"
+                      - name: POSTGRES_PASSWORD
+                        value: "admin"
+                      - name: PGDATA
+                        value: /var/lib/postgresql/data/pgdata
+                      - name: POD_IP
+                        valueFrom: { fieldRef: { fieldPath: status.podIP } }
+                  image: "postgres:9.6"
+                  imagePullPolicy: IfNotPresent
+                  ports:
+                      - containerPort: 5432
+                        protocol: TCP
+                  livenessProbe:
+                      exec:
+                          command:
+                              - sh
+                              - -c
+                              - exec pg_isready --host $POD_IP
+                      initialDelaySeconds: 60
+                      timeoutSeconds: 5
+                      failureThreshold: 6
+                  readinessProbe:
+                      exec:
+                          command:
+                              - sh
+                              - -c
+                              - exec pg_isready --host $POD_IP
+                      initialDelaySeconds: 60
+                      timeoutSeconds: 3
+                      periodSeconds: 5
+                  volumeMounts:
+                      - mountPath: /var/lib/postgresql/data
+                        name: dmitrii-popkov-spring-exercise-db
+            serviceAccount: dmitrii-popkov-spring-exercise
+            {{- with .Values.nodeSelector }}
+            nodeSelector:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- with .Values.affinity }}
+            affinity:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- with .Values.tolerations }}
+            tolerations:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            volumes:
+                - name: dmitrii-popkov-spring-exercise-db
+                  persistentVolumeClaim: 
+                      claimName: dmitrii-popkov-spring-exercise-db
+

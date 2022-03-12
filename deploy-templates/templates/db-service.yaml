@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: dmitrii-popkov-spring-exercise-db
+    labels:
+        app: dmitrii-popkov-spring-exercise-db
+spec:
+    ports:
+        - name: dmitrii-popkov-spring-exercise-db
+          port: 5432
+    selector:
+        app: dmitrii-popkov-spring-exercise-db
+    type: ClusterIP
+    sessionAffinity: None

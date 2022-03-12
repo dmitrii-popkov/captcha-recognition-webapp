@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.epam.rdru.popkov.dmitrii.exercise.spring.AppTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.364 s - in com.epam.rdru.popkov.dmitrii.exercise.spring.AppTests

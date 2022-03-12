@@ -1,0 +1,40 @@
+replicaCount: 1
+image:
+  repository: dmitrii-popkov-spring-exercise
+  pullPolicy: IfNotPresent
+  tag: ''
+imagePullSecrets: []
+nameOverride: ''
+fullnameOverride: ''
+framework: java11
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ''
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+service:
+  type: ClusterIP
+  port: 80
+ingress:
+  enabled: false
+  annotations: {}
+  pathType: Prefix
+  path: /
+  dnsWildcard: shared.edp-epam.com
+  tls: []
+resources: {}
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+nodeSelector:
+  project: epm-rdru
+tolerations:
+- key: project
+  operator: Equal
+  effect: NoSchedule
+  value: epm-rdru
+affinity: {}

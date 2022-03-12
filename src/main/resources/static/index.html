@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Captcha recognition</title>
+    <link rel="stylesheet" href="/static/index.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/static/callbackFactory.js"></script>
+    <script src="/static/EventEmitter.js"></script>
+    <script src="/static/model/CaptchaModel.js"></script>
+    <script src="/static/view/CaptchaView.js"></script>
+    <script src="/static/model/HistoryModel.js"></script>
+    <script src="/static/model/UserModel.js"></script>
+    <script src="/static/view/HistoryBarView.js"></script>
+    <script src="/static/view/HistoryScreenView.js"></script>
+    <script src="/static/view/UserBarView.js"></script>
+    <script src="/static/view/PageMenuView.js"></script>
+    <script src="/static/service/HistoryNoteService.js"></script>
+    <script src="/static/view/ProfilePageView.js"></script>
+    <script src="/static/service/CaptchaService.js"></script>
+    <script src="/static/model/TagsModel.js"></script>
+    <script src="/static/service/TagService.js"></script>
+    <script src="/static/view/ModalScreenView.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+</head>
+<body>
+    <div class="error error-template hide">
+
+    </div>
+    <div class="filter-option tag-option-template hide">
+        <div class="filter-option-icon">
+            <span class="dot red"></span>
+        </div>
+        <a href="#" class="filter-option-label"></a>
+    </div>
+    <div class="modal sign-up-modal hide">
+        <div class="modal-container sign-up-container">
+            <div class="sign-up-form">
+                <div class="sign-up-header">
+                    <h2>Sign Up</h2>
+                </div>
+                <div class="login-field field-container">
+                    <p class="login-label">Login</p>
+                    <input type="text" name="login-input" class="login-input" />
+                </div>
+                <div class="error login-error">
+
+                </div>
+                <div class="password-field field-container">
+                    <p  class="password-label">Password</p>
+                    <input type="password" name="password-input" class="password-input"  />
+                </div>
+                <div class="error password-error">
+
+                </div>
+                <div class="error auth-error">
+
+                </div>
+                <div class="buttons-bar">
+                    <button class="cancel-button">Cancel</button>
+                    <button class="sign-up-button">Sign up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal login-modal hide">
+        <div class="modal-container login-container">
+            <div class="login-form">
+                <div class="login-header">
+                    <h2>Sign in</h2>
+                </div>
+                <div class="login-field field-container">
+                    <p class="login-label">Login</p>
+                    <input type="text" name="login-input" class="login-input" />
+                </div>
+                <div class="error login-error">
+
+                </div>
+                <div class="password-field field-container">
+                    <p  class="password-label">Password</p>
+                    <input type="password" name="password-input" class="password-input"  />
+                </div>
+                <div class="error password-error">
+
+                </div>
+                <div class="error auth-error">
+
+                </div>
+                <div class="buttons-bar">
+                    <button class="cancel-button">Cancel</button>
+                    <button class="login-button">Login</button>
+                    <button class="sign-up-button">Sign up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="history-item-template" class="history-item hide">
+        <div class="history-item-icon">
+            <img src="/static/images/history-icon.png" alt />
+        </div>
+        <div class="history-item-label">
+            <div class="history-info"></div>
+            <div class="history-stamp"></div>
+        </div>
+    </div>
+    <div class="template history-screen-tag-item hide">
+        <div class="change-author change">
+            <div class="label">Author:</div>
+            <div class="value"></div>
+        </div>
+        <div class="change-action change">
+            <div class="label">Action:</div>
+            <div class="value"></div>
+        </div>
+        <div class="change-stamp change">
+            <div class="label">Created at:</div>
+            <div class="value"></div>
+        </div>
+        <div class="change-tag change">
+            <div class="label">Tag:</div>
+            <div class="value"></div>
+        </div>
+    </div>
+    <div class="template history-screen-item hide">
+            <div class="change-author change">
+                <div class="label">Author:</div>
+                <div class="value"></div>
+            </div>
+            <div class="change-action change">
+                <div class="label">Action:</div>
+                <div class="value"></div>
+            </div>
+            <div class="change-stamp change">
+                <div class="label">Created at:</div>
+                <div class="value"></div>
+            </div>
+    </div>
+    <div id= "content-item-template" class="content-item hide">
+        <div class="content-image">
+            <img src="#" alt="" />
+        </div>
+        <div class="content-name"></div>
+        <div class="content-type"></div>
+        <div class="content-author"></div>
+        <div class="content-result"></div>
+    </div>
+    <div class="modal add-captcha-modal hide">
+        <div class="modal-container add-captcha-container">
+            <div class="add-captcha-page">
+                <img src="#" class="add-captcha-image-preview" alt="Preview"/>
+                <div class="add-captcha-form">
+                    <form id="send-image-form" enctype="multipart/form-data">
+                        <input type="file"  accept="image/*" id="add-captcha-image" name="add-captcha-image" required />
+                    </form>
+                    <div class="buttons-bar">
+                        <button class="cancel-button">Cancel</button>
+                        <button class="submit-captcha-button">Save</button>
+                    </div>
+                </div>
+            </div>
+            <div class="rate-captcha-page hide">
+
+                <div class="rate-captcha-form">
+                    <p>IsItRight?</p>
+                    <input class="is-right-input" type="checkbox" name="is-right-input" />
+                    <div class="buttons-bar">
+                        <button class="cancel-button">Cancel</button>
+                        <button class="submit-rate-button">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal edit-captcha-modal hide">
+        <div class="modal-container">
+            <div class="edit-captcha-container">
+                <div class="change-tag-form">
+                    <div class="add-tag-bar">
+                        <input class="create-tag-input" type="text" name="create-tag-input" placeholder="Create your tag"/>
+                        <button class="create-tag-button">Create</button>
+                    </div>
+                    <div class="tag-lists-container">
+                        <div class="tags-container captcha-tags-container"></div>
+                        <div class="change-list-buttons-container">
+                            <button class="add-tag-button"><=</button>
+                            <button class="remove-tag-button">>=</button>
+                        </div>
+                        <div class="tags-container tag-list-container"></div>
+                    </div>
+                    <div class="buttons-bar">
+                        <button class="cancel-button">Cancel</button>
+                        <button class="submit-change-tag-button">Set tag</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <header class="header nav-font">
+            <div class="header-option">
+                Help Center
+            </div>
+            <div class="header-option">
+                Our Support
+            </div>
+            <div class="header-option login">
+                <a href="#" class="sign-in-link"> Sign in</a>
+            </div>
+            <div class="header-option sign-up">
+                <a href="#" class="sign-up-link">Sign up</a>
+            </div>
+            <div class="header-option profile hide">
+                <div class="profile-picture">
+                    <img src="" alt="*pic*" />
+                </div>
+                <div class="user-name"></div>
+                <div class="dropdown">
+                    <button class="dropdown-button">▾</button>
+                    <div class="dropdown-content hide">
+                        <a href="#" class="log-out-link">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <nav class="nav nav-font">
+            <div class="nav-option add-captcha">
+                <button class="add-captcha-button">
+                    <div class="add-captcha-icon">
+                        <div>&nbsp;</div>
+                    </div>
+                    <p class="add-captcha-label">
+                        Add a captcha
+                    </p>
+                </button>
+            </div>
+            <div class="nav-option menu-bar">
+                <div class="menu-option profile">
+                    <div class="menu-option-icon profile">
+                        <img src="/static/images/profile-icon.png" alt=""/>
+                    </div>
+                    <div class="menu-option-label">Profile</div>
+                </div>
+                <div class="menu-option browse selected ">
+                    <div class="menu-option-icon browse">
+                        <img src="/static/images/browse-icon.png" alt="" />
+                    </div>
+                    <div class="menu-option-label">Browse</div>
+                </div>
+                <div class="menu-option buy">
+                    <div class="menu-option-icon buy">
+                        <img src="/static/images/buy-icon.png" alt="" />
+                    </div>
+                    <div class="menu-option-label">Buy</div>
+                </div>
+                <div class="menu-option history">
+                    <div class="menu-option-icon history">
+                        <img src="/static/images/history-icon.png" alt="" />
+                    </div>
+                    <div class="menu-option-label">History</div>
+                </div>
+            </div>
+            <div class="nav-option tags-bar">
+                <div class="filter-option">
+                    <div class="filter-option-icon">
+                        <span class="dot red"></span>
+                    </div>
+                    <a href="#" class="filter-option-label" id="recaptcha">ReCaptcha</a>
+                </div>
+                <div class="filter-option">
+                    <div class="filter-option-icon">
+                        <span class="dot orange"></span>
+                    </div>
+                    <a href="#" class="filter-option-label" id="captchas_net">Captchas.net</a>
+                </div>
+                <div class="filter-option">
+                    <div class="filter-option-icon">
+                        <span class="dot cyan"></span>
+                    </div>
+                    <a href="#" class="filter-option-label" id="wolfram_alpha">WolframAlpha</a>
+                </div>
+                <div class="filter-option">
+                    <div class="filter-option-icon">
+                        <span class="dot violet"></span>
+                    </div>
+                    <a href="#" class="filter-option-label" id="wikipedia">Wikipedia</a>
+                </div>
+            </div>
+            <div class="nav-option history-bar">
+                <div class="history-item">
+                    <div class="history-item-icon">
+                        <img src="/static/images/history-icon.png" alt="" />
+                    </div>
+                    <div class="history-item-label">
+                        <div class="history-info">Eh... smth happened</div>
+                        <div class="history-stamp">Today</div>
+                    </div>
+                </div>
+                <div class="history-item">
+                    <div class="history-item-icon">
+                        <img src="/static/images/history-icon.png" alt="" />
+                    </div>
+                    <div class="history-item-label">
+                        <div class="history-info">Eh... happened</div>
+                        <div class="history-stamp">Today</div>
+                    </div>
+                </div>
+
+                <div class="history-item">
+                    <div class="history-item-icon">
+                        <img src="/static/images/history-icon.png" alt="" />
+                    </div>
+                    <div class="history-item-label">
+                        <div class="history-info">Eh... smth happened too ;(</div>
+                        <div class="history-stamp">Yesterday</div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <header class="main profile profile-header">
+            <h1>Profile</h1>
+        </header>
+        <nav class="main profile profile-nav">
+            <div class="main-nav-option profile-about main-nav-selected">
+                About
+            </div>
+            <div class="main-nav-option profile-captchas">
+                Captcha list
+            </div>
+            <div class="main-nav-option profile-statistics">
+                Statistics
+            </div>
+        </nav>
+        <div class="main profile profile-content profile-content-about">
+
+        </div>
+        <div class="main profile profile-content profile-content-captchas">
+
+        </div>
+        <div class="main profile profile-content profile-content-statistics">
+
+        </div>
+        <header class="history main history-header">
+            <h1>History notifications</h1>
+        </header>
+        <div class="history main history-content">
+
+        </div>
+        <div class="main buy">
+            TBD
+        </div>
+        <header class="main-header browse main">
+            <h1>Some header</h1>
+        </header>
+        <nav class="main-nav browse main">
+            <div class="main-nav-option main-nav-selected filter" id="all">
+                All captchas
+            </div>
+            <div class="main-nav-option filter" id="unchecked">
+                Unchecked
+            </div>
+            <div class="main-nav-option filter" id="solved">
+                Solved
+            </div>
+            <div class="main-nav-option filter" id="not_solved">
+                Not solved
+            </div>
+            <div class="main-nav-option only-my-filter">
+                Only my
+            </div>
+            <div class="search-bar">
+                <input class="search-input" name="search-value" type="text"/>
+                <button class="search-button"></button>
+            </div>
+        </nav>
+        <div class="main-content browse main">
+        </div>
+        <footer class="footer">
+            <div class="footer-option">&nbsp;
+            </div>
+            <div class="footer-option blue">&nbsp;
+            </div>
+        </footer>
+    </div>
+    <script src="/static/index.js"></script>
+
+</body>
+</html>
